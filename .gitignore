@@ -6,3 +6,8 @@
 
 # Composer files
 /vendor
+
+# Editors
+*.sublime-workspace
+/.vscode
+/.idea
