@@ -6,14 +6,13 @@ use Kirby\Filesystem\F;
 
 class StatiCache extends FileCache
 {
-
     public function __construct(array $options)
     {
         parent::__construct($options);
         $this->root = kirby()->root('index') . '/static';
     }
 
-    public function file(string $key): string
+    protected function file(string $key): string
     {
         $path      = dirname($key);
         $name      = F::name($key);
@@ -26,14 +25,19 @@ class StatiCache extends FileCache
         return $this->root . '/' . $path . '/' . $name . '/index.' . $extension;
     }
 
-    public function retrieve(string $key)
+    public function retrieve(string $key): Value|null
     {
-        return F::read($this->file($key));
+        $file  = $this->file($key);
+        $value = F::read($file);
+
+        return $value ? new Value($value) : null;
     }
 
     public function set(string $key, $value, int $minutes = 0): bool
     {
-        return F::write($this->file($key), $value['html'] . '<!-- static -->');
-    }
+        $file  = $this->file($key);
+        $value = '<!-- static -->' . PHP_EOL . $value['html'];
 
+        return F::write($file, $value);
+    }
 }
