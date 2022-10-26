@@ -26,9 +26,10 @@ class StatiCache extends FileCache
         return $this->root . '/' . $path . '/' . $name . '/index.' . $extension;
     }
 
-    public function retrieve(string $key)
+    public function retrieve(string $key): Value|null
     {
-        return F::read($this->file($key));
+        $value = F::read($this->file($key));
+        return $value ? new Value($value) : null;
     }
 
     public function set(string $key, $value, int $minutes = 0): bool
