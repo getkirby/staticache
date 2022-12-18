@@ -2,13 +2,13 @@
 
 Static site performance on demand!
 
-This plugin will give you the performance of a static site generator for your regular Kirby installations. Without a huge setup or complex deploy steps, you can just run your Kirby site on any server – cheap shared hosting, VPS, you name it – and switch on the static cache to get incredible speed on demand. 
+This plugin will give you the performance of a static site generator for your regular Kirby installations. Without a huge setup or complex deployment steps, you can run your Kirby site on any server – cheap shared hosting, VPS, you name it – and enable the static cache to get incredible speed on demand. 
 
-With custom ignore rules, you can even mix static and dynamic content. Keep some pages static while others are still served live by Kirby. 
+With custom ignore rules, you can even mix static and dynamic content. Keep some pages static while others are still served live by Kirby.
 
 The static cache will automatically be flushed whenever content gets updated in the Panel. It's truly the best of both worlds. 
 
-Rough benchmark comparison for our starterkit home page: 
+Rough benchmark comparison for our Starterkit home page: 
 
 Without page cache: ~70 ms  
 With page cache: ~30 ms   
@@ -46,7 +46,9 @@ git submodule add https://github.com/getkirby/staticache.git site/plugins/static
 
 ### Cache configuration
 
-Staticache is just a cache driver that can be activated for the page cache:
+**Basic setup:**
+
+Staticache is a cache driver that can be activated for the pages cache:
 
 ```php
 // /site/config/config.php
@@ -55,14 +57,15 @@ return [
   'cache' => [
     'pages' => [
       'active' => true,
-      'type' => 'static'
+      'type'   => 'static'
     ]
   ]
 ];
 ```
 
-You can also use the cache ignore rules to skip pages that should not be cached:
-https://getkirby.com/docs/guide/cache#caching-pages
+**Ignore rules:**
+
+If you want to keep some of your pages dynamic, you can configure ignore rules like for the native pages cache: https://getkirby.com/docs/guide/cache#caching-pages
 
 ```php
 // /site/config/config.php
@@ -71,7 +74,7 @@ return [
   'cache' => [
     'pages' => [
       'active' => true,
-      'type' => 'static',
+      'type'   => 'static',
       'ignore' => function ($page) {
         return $page->template()->name() === 'blog';
       }
@@ -80,32 +83,39 @@ return [
 ];
 ```
 
-Kirby will automatically purge the cache when changes are made in the Panel.
+All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
 
-### htaccess rules
+### Web server integration
 
-Add the following lines to your Kirby htaccess file, directly after the RewriteBase rule.
+This plugin will automatically generate and store the cache files, however you need to configure your web server to pick the files up and prefer them over a dynamic result from PHP.
+
+The configuration depends on your used web server:
+
+**Apache:**
+
+Add the following lines to your Kirby `.htaccess` file, directly after the `RewriteBase` rule.
 
 ```
 RewriteCond %{DOCUMENT_ROOT}/static/%{REQUEST_URI}/index.html -f [NC]
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/static/%{REQUEST_URI}/index.html [L]
 ```
 
-### nginx
+**nginx:**
 
-Standard php nginx config will have this location block for all requests
-
-```
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-```
-change it to add `/static/$uri/index.html` before last `/index.php` fallback
+Standard PHP nginx config will have this location block for all requests:
 
 ```
-    location / {
-        try_files $uri $uri/ /static/$uri/index.html /index.php?$query_string;
-    }
+location / {
+  try_files $uri $uri/ /index.php?$query_string;
+}
+```
+
+Change it to add `/static/$uri/index.html` before the last `/index.php` fallback:
+
+```
+location / {
+  try_files $uri $uri/ /static/$uri/index.html /index.php?$query_string;
+}
 ```
 
 ## What’s Kirby?
