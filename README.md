@@ -14,16 +14,6 @@ Without page cache: ~70 ms
 With page cache: ~30 ms   
 With static cache: ~10 ms
 
-## 🚨 Experimental
-
-This plugin is still an experiment. The first results are very promising but it needs to be tested on more servers and has a couple open todos:
-
-- [x] Nginx config example
-- [ ] Caddy config example
-- [x] Publish on Packagist to be installable via composer
-- [x] Hooks to automatically flush the cache when content is updated via the Panel
-- [x] Add options to ignore pages from caching
-
 ## Installation
 
 ### Download
@@ -137,6 +127,21 @@ Add the following lines to your Kirby `.htaccess` file, directly after the `Rewr
 ```
 RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f [NC]
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [L]
+```
+
+**Caddy:**
+
+A simple Caddy config for Staticache may look like this:
+
+```
+example.com
+
+root * /path/to/your/site
+
+file_server
+php_fastcgi unix//var/run/php-fpm.sock {
+  try_files {path} site/cache/{host}/pages/{path}/index.html index.php
+}
 ```
 
 **nginx:**
