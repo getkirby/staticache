@@ -31,9 +31,16 @@ class StatiCache extends FileCache
 	 * Internal method to retrieve the raw cache value;
 	 * needs to return a Value object or null if not found
 	 */
-	public function retrieve(string $key)
+	public function retrieve(string $key): Value|null
 	{
-		return F::read($this->file($key));
+		$file  = $this->file($key);
+		$value = F::read($file);
+
+		if (is_string($value) === true) {
+			return new Value($value, 0, filemtime($file));
+		}
+
+		return null;
 	}
 
 	/**
