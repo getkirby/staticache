@@ -85,6 +85,45 @@ return [
 
 All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
 
+**Custom root:**
+
+The rendered HTML files are stored in the `site/caches/example.com/pages/` folder just like with the native pages cache. The difference is that all paths within this folder match the URL structure of your site. The separate directories for each root URL ensure that links and references in your rendered HTML keep working even in a multi-domain setup.
+
+If you are using a custom web server setup, you can override the cache root like so:
+
+```php
+// /site/config/config.php
+
+return [
+  'cache' => [
+    'pages' => [
+      'active' => true,
+      'type'   => 'static',
+      'root'   => '/path/to/your/cache/root',
+      'prefix' => null
+    ]
+  ]
+];
+```
+
+If your site is only served on a single domain, you can disable the root URL prefix like so while keeping the general storage location in the `site/cache` directory:
+
+```php
+// /site/config/config.php
+
+return [
+  'cache' => [
+    'pages' => [
+      'active' => true,
+      'type'   => 'static',
+      'prefix' => 'pages'
+    ]
+  ]
+];
+```
+
+If you use a custom root and/or prefix, please modify the following server configuration examples accordingly.
+
 ### Web server integration
 
 This plugin will automatically generate and store the cache files, however you need to configure your web server to pick the files up and prefer them over a dynamic result from PHP.
@@ -96,8 +135,8 @@ The configuration depends on your used web server:
 Add the following lines to your Kirby `.htaccess` file, directly after the `RewriteBase` rule.
 
 ```
-RewriteCond %{DOCUMENT_ROOT}/static/%{REQUEST_URI}/index.html -f [NC]
-RewriteRule ^(.*) %{DOCUMENT_ROOT}/static/%{REQUEST_URI}/index.html [L]
+RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f [NC]
+RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [L]
 ```
 
 **nginx:**
@@ -110,11 +149,11 @@ location / {
 }
 ```
 
-Change it to add `/static/$uri/index.html` before the last `/index.php` fallback:
+Change it to add `/site/cache/$server_addr/pages/$uri/index.html` before the last `/index.php` fallback:
 
 ```
 location / {
-  try_files $uri $uri/ /static/$uri/index.html /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /index.php?$query_string;
 }
 ```
 

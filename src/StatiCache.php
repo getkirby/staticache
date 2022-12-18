@@ -19,15 +19,6 @@ use Kirby\Filesystem\F;
 class StatiCache extends FileCache
 {
 	/**
-	 * Sets all parameters which are needed for the file cache
-	 */
-	public function __construct(array $options)
-	{
-		parent::__construct($options);
-		$this->root = kirby()->root('index') . '/static';
-	}
-
-	/**
 	 * Internal method to retrieve the raw cache value;
 	 * needs to return a Value object or null if not found
 	 */
