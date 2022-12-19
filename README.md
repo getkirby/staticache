@@ -127,6 +127,9 @@ Add the following lines to your Kirby `.htaccess` file, directly after the `Rewr
 ```
 RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f [NC]
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [L]
+
+RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} -f [NC]
+RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} [L]
 ```
 
 **Caddy:**
@@ -140,7 +143,7 @@ root * /path/to/your/site
 
 file_server
 php_fastcgi unix//var/run/php-fpm.sock {
-  try_files {path} site/cache/{host}/pages/{path}/index.html index.php
+  try_files {path} site/cache/{host}/pages/{path}/index.html site/cache/{host}/pages/{path} index.php
 }
 ```
 
@@ -158,7 +161,7 @@ Change it to add `/site/cache/$server_addr/pages/$uri/index.html` before the las
 
 ```
 location / {
-  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
 }
 ```
 
