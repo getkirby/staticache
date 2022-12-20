@@ -18,7 +18,7 @@ With static cache: ~10 ms
 
 This plugin is still an experiment. The first results are very promising but it needs to be tested on more servers and has a couple open todos:
 
-- [ ] Nginx config example
+- [x] Nginx config example
 - [ ] Caddy config example
 - [x] Publish on Packagist to be installable via composer
 - [x] Hooks to automatically flush the cache when content is updated via the Panel
@@ -123,8 +123,4 @@ change it to add `/static/$uri/index.html` before last `/index.php` fallback
 
 ## License
 
-MIT
-
-## Credits
-
-- [Bastian Allgeier](https://getkirby.com/plugins/getkirby)
+[MIT](./LICENSE) License © 2022 [Bastian Allgeier](https://getkirby.com)

@@ -4,36 +4,60 @@ namespace Kirby\Cache;
 
 use Kirby\Filesystem\F;
 
+/**
+ * An alternative implementation for the pages cache
+ * that caches full HTML files to be read directly
+ * by the web server.
+ *
+ * @package   Kirby Staticache
+ * @author    Bastian Allgeier <bastian@getkirby.com>,
+ *            Lukas Bestle <lukas@getkirby.com>
+ * @link      https://getkirby.com
+ * @copyright Bastian Allgeier
+ * @license   https://opensource.org/licenses/MIT
+ */
 class StatiCache extends FileCache
 {
+	/**
+	 * Sets all parameters which are needed for the file cache
+	 */
+	public function __construct(array $options)
+	{
+		parent::__construct($options);
+		$this->root = kirby()->root('index') . '/static';
+	}
 
-    public function __construct(array $options)
-    {
-        parent::__construct($options);
-        $this->root = kirby()->root('index') . '/static';
-    }
+	/**
+	 * Internal method to retrieve the raw cache value;
+	 * needs to return a Value object or null if not found
+	 */
+	public function retrieve(string $key)
+	{
+		return F::read($this->file($key));
+	}
 
-    public function file(string $key): string
-    {
-        $path      = dirname($key);
-        $name      = F::name($key);
-        $extension = F::extension($key);
+	/**
+	 * Writes an item to the cache for a given number of minutes and
+	 * returns whether the operation was successful
+	 */
+	public function set(string $key, $value, int $minutes = 0): bool
+	{
+		return F::write($this->file($key), $value['html'] . '<!-- static -->');
+	}
 
-        if ($name === 'home') {
-            return $this->root . '/index.html';
-        }
+	/**
+	 * Returns the full path to a file for a given key
+	 */
+	protected function file(string $key): string
+	{
+		$path      = dirname($key);
+		$name      = F::name($key);
+		$extension = F::extension($key);
 
-        return $this->root . '/' . $path . '/' . $name . '/index.' . $extension;
-    }
+		if ($name === 'home') {
+			return $this->root . '/index.html';
+		}
 
-    public function retrieve(string $key)
-    {
-        return F::read($this->file($key));
-    }
-
-    public function set(string $key, $value, int $minutes = 0): bool
-    {
-        return F::write($this->file($key), $value['html'] . '<!-- static -->');
-    }
-
+		return $this->root . '/' . $path . '/' . $name . '/index.' . $extension;
+	}
 }
