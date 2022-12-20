@@ -75,6 +75,32 @@ return [
 
 All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
 
+**Custom cache comment:**
+
+Staticache adds an HTML comment like `<!-- static YYYY-MM-DDT01:02:03+00:00 -->` to the end of every cached HTML file by default. You can override or disable this comment in the cache configuration:
+
+```php
+// /site/config/config.php
+
+return [
+  'cache' => [
+    'pages' => [
+      'active' => true,
+      'type'   => 'static',
+
+      // disabled comment
+      'comment' => '',
+
+      // OR string value (only for HTML)
+      'comment' => '<!-- your custom comment -->',
+
+      // OR a custom closure
+      'comment' => fn ($contentType) => $contentType === 'html' ? '<!-- comment -->' : ''
+    ]
+  ]
+];
+```
+
 **Custom root:**
 
 The rendered HTML files are stored in the `site/caches/example.com/pages/` folder just like with the native pages cache. The difference is that all paths within this folder match the URL structure of your site. The separate directories for each root URL ensure that links and references in your rendered HTML keep working even in a multi-domain setup.

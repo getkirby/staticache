@@ -2,6 +2,7 @@
 
 namespace Kirby\Cache;
 
+use Closure;
 use Kirby\Cms\App;
 use Kirby\Filesystem\F;
 use Kirby\Toolkit\Str;
@@ -44,13 +45,39 @@ class StatiCache extends FileCache
 	{
 		$cacheId = static::parseCacheId($key);
 
-		$body = $value['html'];
+		$body = $this->appendComment($value['html'], $cacheId['contentType']);
 
-		if ($cacheId['contentType'] === 'html') {
+		return F::write($this->file($cacheId), $body);
+	}
+
+	/**
+	 * Appends a (HTML) comment to a cached body for
+	 * identification of cached responses
+	 */
+	protected function appendComment(string $body, string $contentType): string
+	{
+		// custom string or callback
+		if (isset($this->options['comment']) === true) {
+			$comment = $this->options['comment'];
+
+			if ($comment instanceof Closure) {
+				return $body . $comment($contentType);
+			}
+
+			// use string comments for HTML bodies only
+			if (is_string($comment) === true && $contentType === 'html') {
+				return $body . $comment;
+			}
+
+			return $body;
+		}
+
+		// default implementation
+		if ($contentType === 'html') {
 			$body .= '<!-- static ' . date('c') . ' -->';
 		}
 
-		return F::write($this->file($cacheId), $body);
+		return $body;
 	}
 
 	/**
