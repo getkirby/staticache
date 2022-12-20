@@ -191,6 +191,40 @@ location / {
 }
 ```
 
+### Header support
+
+Staticache stores only the response bodies by default. The HTTP status code as well as headers set by your pages are not preserved in this mode. This ensures compatibility with all web servers.
+
+If your web server supports reading headers from the static files, you can enable header support with the `headers` option:
+
+```php
+// /site/config/config.php
+
+return [
+  'cache' => [
+    'pages' => [
+      'active'  => true,
+      'type'    => 'static',
+      'headers' => true
+    ]
+  ]
+];
+```
+
+You need to adapt your web server configuration accordingly:
+
+**Apache:**
+
+Header support in Apache requires [`mod_asis`](https://httpd.apache.org/docs/current/mod/mod_asis.html). Please ensure that your Apache installation has this module installed and enabled.
+
+Afterwards add the following block to your `.htaccess` file to make Apache use `mod_asis` for cached files:
+
+```
+<Directory "/var/www/your-site/site/cache">
+  SetHandler send-as-is
+</Directory>
+```
+
 ## What’s Kirby?
 - **[getkirby.com](https://getkirby.com)** – Get to know the CMS.
 - **[Try it](https://getkirby.com/try)** – Take a test ride with our online demo. Or download one of our kits to get started.

@@ -5,6 +5,7 @@ namespace Kirby\Cache;
 use Closure;
 use Kirby\Cms\App;
 use Kirby\Filesystem\F;
+use Kirby\Filesystem\Mime;
 use Kirby\Toolkit\Str;
 
 /**
@@ -45,9 +46,19 @@ class StatiCache extends FileCache
 	{
 		$cacheId = static::parseCacheId($key);
 
-		$body = $this->appendComment($value['html'], $cacheId['contentType']);
+		// body
+		$result = $this->appendComment($value['html'], $cacheId['contentType']);
 
-		return F::write($this->file($cacheId), $body);
+		// headers (if enabled)
+		if (
+			isset($this->options['headers']) === true &&
+			$this->options['headers'] === true
+		) {
+			$headers = static::headersFromResponse($value['response'], $cacheId['contentType']);
+			$result  = $headers . "\n\n" . $result;
+		}
+
+		return F::write($this->file($cacheId), $result);
 	}
 
 	/**
@@ -108,6 +119,23 @@ class StatiCache extends FileCache
 		}
 
 		return $root . '.' . $key['contentType'];
+	}
+
+	/**
+	 * Serializes all headers from a response array to a string of HTTP headers
+	 */
+	protected static function headersFromResponse(array $response, string $extension): string
+	{
+		$headers = [
+			'Status: ' . ($response['code'] ?? 200),
+			'Content-Type: ' . ($response['type'] ?? Mime::fromExtension($extension))
+		];
+
+		foreach ($response['headers'] as $key => $value) {
+			$headers[] = $key . ': ' . $value;
+		}
+
+		return implode("\n", $headers);
 	}
 
 	/**
