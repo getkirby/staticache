@@ -103,7 +103,7 @@ return [
 
 **Custom root:**
 
-The rendered HTML files are stored in the `site/caches/example.com/pages/` folder just like with the native pages cache. The difference is that all paths within this folder match the URL structure of your site. The separate directories for each root URL ensure that links and references in your rendered HTML keep working even in a multi-domain setup.
+The rendered HTML files are stored in the `site/cache/example.com/pages/` folder just like with the native pages cache. The difference is that all paths within this folder match the URL structure of your site. The separate directories for each root URL ensure that links and references in your rendered HTML keep working even in a multi-domain setup.
 
 If you are using a custom web server setup, you can override the cache root like so:
 
