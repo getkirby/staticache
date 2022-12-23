@@ -14,6 +14,12 @@ Without page cache: ~70 ms
 With page cache: ~30 ms   
 With static cache: ~10 ms
 
+## Limitations
+
+A statically cached page will prevent any Kirby logic from executing. This means that Kirby can no longer differentiate between visitors and logged-in users. Every request will be served directly by your web server, even if the response would differ based on the cookies or other request headers.
+
+If your site has any logic in controllers, page models, templates, snippets or plugins that results in different page responses depending on the request, this logic will naturally not be compatible with Staticache. If only specific pages are affected by this, you can add them to the cache ignore list (see below) and use Staticache for the rest of your site.
+
 ## Installation
 
 ### Download
