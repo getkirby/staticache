@@ -217,7 +217,7 @@ To load the static cache files from PHP, please place the following code snippet
     return;
   }
 
-	// determine the exact file to use
+  // determine the exact file to use
   $path = $root . '/' . ltrim($_SERVER['REQUEST_URI'] ?? '', '/');
   if (is_file($path . '/index.html') === true) {
     // a HTML representation exists in the cache
@@ -271,7 +271,7 @@ Afterwards add the following block to your `.htaccess` file to make Apache use `
 Replace the last line of the loader function with this code:
 
 ```php
-	// split the file into headers (before two line breaks) and body
+  // split the file into headers (before two line breaks) and body
   $file    = file_get_contents($path);
   $divide  = mb_strpos($file, "\n\n");
   $headers = mb_substr($file, 0, $divide);
