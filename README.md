@@ -83,6 +83,8 @@ return [
 
 All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
 
+Please note that already cached pages are unaffected by changes to the `ignore` option. Your web server will pick up the already created files and will not check if the page is cacheable. If you see cached results from ignored pages, please manually clear your cache directory.
+
 **Custom cache comment:**
 
 Staticache adds an HTML comment like `<!-- static YYYY-MM-DDT01:02:03+00:00 -->` to the end of every cached HTML file by default. You can override or disable this comment in the cache configuration:
