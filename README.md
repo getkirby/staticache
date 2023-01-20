@@ -201,6 +201,37 @@ location / {
 }
 ```
 
+**PHP loader:**
+
+If you don't have access to the server configuration, you can load the static caches from your Kirby `index.php`. Compared to Kirby's built-in page cache, this avoids having to load Kirby on every request, but all requests are still passed to PHP. This makes this approach slower than the direct integration into the web server but still much faster than the built-in page cache.
+
+To load the static cache files from PHP, please place the following code snippet right at the top (!) of your `index.php` file (directly after the opening `<?php` tag):
+
+```php
+(function /* staticache */ () {
+  $root = __DIR__ . '/site/cache';
+
+  // check if a cache for this domain exists
+  $root .= '/' . $_SERVER['SERVER_NAME'] . '/pages';
+  if (is_dir($root) !== true) {
+    return;
+  }
+
+	// determine the exact file to use
+  $path = $root . '/' . ltrim($_SERVER['REQUEST_URI'] ?? '', '/');
+  if (is_file($path . '/index.html') === true) {
+    // a HTML representation exists in the cache
+    $path = $path . '/index.html';
+  } elseif (is_file($path) !== true) {
+    // neither a HTML representation nor a custom
+    // representation exists in the cache
+    return;
+  }
+
+  die(file_get_contents($path));
+})();
+```
+
 ### Header support
 
 Staticache stores only the response bodies by default. The HTTP status code as well as headers set by your pages are not preserved in this mode. This ensures compatibility with all web servers.
@@ -233,6 +264,28 @@ Afterwards add the following block to your `.htaccess` file to make Apache use `
 <Directory "/var/www/your-site/site/cache">
   SetHandler send-as-is
 </Directory>
+```
+
+**PHP loader:**
+
+Replace the last line of the loader function with this code:
+
+```php
+	// split the file into headers (before two line breaks) and body
+  $file    = file_get_contents($path);
+  $divide  = mb_strpos($file, "\n\n");
+  $headers = mb_substr($file, 0, $divide);
+  $body    = mb_substr($file, $divide + 2);
+
+  foreach (explode("\n", $headers) as $header) {
+    if (mb_substr($header, 0, 7) === 'Status:') {
+      http_response_code((int)trim(mb_substr($header, 8)));
+    } else {
+      header($header);
+    }
+  }
+
+  die($body);
 ```
 
 ## What’s Kirby?
