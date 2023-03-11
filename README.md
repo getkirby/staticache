@@ -150,6 +150,13 @@ return [
 
 If you use a custom root and/or prefix, please modify the following server configuration examples accordingly.
 
+If your custom root is outside of the server's document root, users have been successful with these solutions:
+
+- Create a symbolic link (symlink) from your custom root to a path inside the document root. Then use the path inside the document root in the server configuration. For this to work, the server needs to be set up to follow symlinks.
+- In an Apache setup: Replace the `%{DOCUMENT_ROOT}` variable with the absolute path to your custom root on the server. E.g. `RewriteCond /var/www/yourPath/%{REQUEST_URI}/...`
+
+In any case, please ensure that your web server has read access to the cache files in your custom root, otherwise it will not be able to handle requests with the statically cached files.
+
 ### Web server integration
 
 This plugin will automatically generate and store the cache files, however you need to configure your web server to pick the files up and prefer them over a dynamic result from PHP.
