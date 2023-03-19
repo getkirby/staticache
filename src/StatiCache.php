@@ -108,7 +108,7 @@ class StatiCache extends FileCache
 		$url  = $page?->url($key['language']) ?? Url::to($key['id']);
 
 		// content representation paths of the home page contain the home slug
-		if ($page->isHomePage() === true && $key['contentType'] !== 'html') {
+		if ($page?->isHomePage() === true && $key['contentType'] !== 'html') {
 			$url .= '/' . $page->uri($key['language']);
 		}
 
