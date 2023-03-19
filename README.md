@@ -235,6 +235,11 @@ To load the static cache files from PHP, please place the following code snippet
     return;
   }
 
+  // try to determine the content type from the static file
+  if ($mime = @mime_content_type($path)) {
+    header("Content-Type: $mime");
+  }
+
   die(file_get_contents($path));
 })();
 ```
@@ -275,7 +280,7 @@ Afterwards add the following block to your `.htaccess` file to make Apache use `
 
 **PHP loader:**
 
-Replace the last line of the loader function with this code:
+Replace the last six lines of the loader function with this code:
 
 ```php
   // split the file into headers (before two line breaks) and body
