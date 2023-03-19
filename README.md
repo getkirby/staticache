@@ -244,6 +244,8 @@ To load the static cache files from PHP, please place the following code snippet
 })();
 ```
 
+If you want to use the PHP loader, we recommend to use it together with header support (see below). Storing the headers increases performance by a bit and also gives you more accurate responses.
+
 ### Header support
 
 Staticache stores only the response bodies by default. The HTTP status code as well as headers set by your pages are not preserved in this mode. This ensures compatibility with all web servers.
