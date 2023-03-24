@@ -4,6 +4,7 @@ namespace Kirby\Cache;
 
 use Closure;
 use Kirby\Cms\App;
+use Kirby\Cms\Url;
 use Kirby\Filesystem\F;
 use Kirby\Filesystem\Mime;
 use Kirby\Toolkit\Str;
@@ -104,10 +105,10 @@ class StatiCache extends FileCache
 		}
 
 		$page = $kirby->page($key['id']);
-		$url  = $page->url($key['language']);
+		$url  = $page?->url($key['language']) ?? Url::to($key['id']);
 
 		// content representation paths of the home page contain the home slug
-		if ($page->isHomePage() === true && $key['contentType'] !== 'html') {
+		if ($page?->isHomePage() === true && $key['contentType'] !== 'html') {
 			$url .= '/' . $page->uri($key['language']);
 		}
 

@@ -4,7 +4,7 @@
 	"type": "kirby-plugin",
 	"license": "MIT",
 	"homepage": "https://getkirby.com/plugins/getkirby/staticache",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"authors": [
 		{
 			"name": "Bastian Allgeier",
