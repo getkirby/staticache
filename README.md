@@ -81,7 +81,7 @@ return [
 ];
 ```
 
-All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
+All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel. Pages that contain methods like `kirby()->csrf()` will be ignored as well.
 
 Please note that already cached pages are unaffected by changes to the `ignore` option. Your web server will pick up the already created files and will not check if the page is cacheable. If you see cached results from ignored pages, please manually clear your cache directory.
 
