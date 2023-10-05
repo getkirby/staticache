@@ -171,9 +171,11 @@ Add the following lines to your Kirby `.htaccess` file, directly after the `Rewr
 
 ```
 RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f [NC]
+RewriteCond %{HTTP:Cookie} !^.*(kirby_session).*$
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [END]
 
 RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} -f [NC]
+RewriteCond %{HTTP:Cookie} !^.*(kirby_session).*$
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} [END]
 ```
 
