@@ -10,8 +10,8 @@ The static cache will automatically be flushed whenever content gets updated in 
 
 Rough benchmark comparison for our Starterkit home page:
 
-Without page cache: ~70 ms
-With page cache: ~30 ms
+Without page cache: ~70 ms  
+With page cache: ~30 ms  
 With static cache: ~10 ms
 
 ## Limitations
