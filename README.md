@@ -2,16 +2,16 @@
 
 Static site performance on demand!
 
-This plugin will give you the performance of a static site generator for your regular Kirby installations. Without a huge setup or complex deployment steps, you can run your Kirby site on any server – cheap shared hosting, VPS, you name it – and enable the static cache to get incredible speed on demand. 
+This plugin will give you the performance of a static site generator for your regular Kirby installations. Without a huge setup or complex deployment steps, you can run your Kirby site on any server – cheap shared hosting, VPS, you name it – and enable the static cache to get incredible speed on demand.
 
 With custom ignore rules, you can even mix static and dynamic content. Keep some pages static while others are still served live by Kirby.
 
-The static cache will automatically be flushed whenever content gets updated in the Panel. It's truly the best of both worlds. 
+The static cache will automatically be flushed whenever content gets updated in the Panel. It's truly the best of both worlds.
 
-Rough benchmark comparison for our Starterkit home page: 
+Rough benchmark comparison for our Starterkit home page:
 
-Without page cache: ~70 ms  
-With page cache: ~30 ms   
+Without page cache: ~70 ms
+With page cache: ~30 ms
 With static cache: ~10 ms
 
 ## Limitations
@@ -169,7 +169,7 @@ The configuration depends on your used web server:
 
 Add the following lines to your Kirby `.htaccess` file, directly after the `RewriteBase` rule.
 
-```
+```apacheconf
 RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f [NC]
 RewriteCond %{HTTP:Cookie} !^.*(kirby_session).*$
 RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [END]
