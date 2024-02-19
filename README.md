@@ -18,7 +18,7 @@ With static cache: ~10 ms
 
 A statically cached page will prevent any Kirby logic from executing. This means that Kirby can no longer differentiate between visitors and logged-in users. Every request will be served directly by your web server, even if the response would differ based on the cookies or other request headers.
 
-If your site has any logic in controllers, page models, templates, snippets or plugins that results in different page responses depending on the request, this logic will naturally not be compatible with Staticache.
+If your site has any logic in controllers, page models, templates, snippets, or plugins that result in different page responses depending on the request, this logic will naturally not be compatible with Staticache.
 
 If only specific pages are affected by this, you can add them to the cache ignore list (see below) and use Staticache for the rest of your site. Otherwise, using Kirby's default page cache will be the better option overall because Kirby will automatically detect which responses can be cached and which caches can be used for the current request.
 
@@ -46,7 +46,7 @@ git submodule add https://github.com/getkirby/staticache.git site/plugins/static
 
 **Basic setup:**
 
-Staticache is a cache driver that can be activated for the pages cache:
+Staticache is a cache driver that can be activated for the page's cache:
 
 ```php
 // /site/config/config.php
@@ -83,9 +83,9 @@ return [
 
 All pages that are not ignored will automatically be cached on their first visit. Kirby will automatically purge the cache when changes are made in the Panel.
 
-Please note that already cached pages are unaffected by changes to the `ignore` option. Your web server will pick up the already created files and will not check if the page is cacheable. If you see cached results from ignored pages, please manually clear your cache directory.
+Please note that already cached pages are unaffected by changes to the `ignore` option. Your web server will pick up the already-created files and will not check if the page is cacheable. If you see cached results from ignored pages, please manually clear your cache directory.
 
-Also note that Kirby's default caching logic applies on top of manually ignored pages. If your template uses any methods that depend on the user session or request headers (e.g. `$kirby->session()`, `csrf()`...), your pages will not be cached.
+Also, note that Kirby's default caching logic applies on top of manually ignored pages. If your template uses any methods that depend on the user session or request headers (e.g. `$kirby->session()`, `csrf()`...), your pages will not be cached.
 
 **Custom cache comment:**
 
@@ -161,7 +161,7 @@ In any case, please ensure that your web server has read access to the cache fil
 
 ### Web server integration
 
-This plugin will automatically generate and store the cache files, however you need to configure your web server to pick the files up and prefer them over a dynamic result from PHP.
+This plugin will automatically generate and store the cache files, however, you will need to configure your web server to pick the files up and prefer them over a dynamic result from PHP.
 
 The configuration depends on your used web server:
 
@@ -246,7 +246,7 @@ To load the static cache files from PHP, please place the following code snippet
 })();
 ```
 
-If you want to use the PHP loader, we recommend to use it together with header support (see below). Storing the headers increases performance by a bit and also gives you more accurate responses.
+If you want to use the PHP loader, we recommend using it together with header support (see below). Storing the headers increases performance by a bit and also gives you more accurate responses.
 
 ### Header support
 
@@ -274,7 +274,7 @@ You need to adapt your web server configuration accordingly:
 
 Header support in Apache requires [`mod_asis`](https://httpd.apache.org/docs/current/mod/mod_asis.html). Please ensure that your Apache installation has this module installed and enabled.
 
-Afterwards add the following block to your `.htaccess` file to make Apache use `mod_asis` for cached files:
+Afterwards, add the following block to your `.htaccess` file to make Apache use `mod_asis` for cached files:
 
 ```
 <Directory "/var/www/your-site/site/cache">
@@ -307,7 +307,7 @@ Replace the last six lines of the loader function with this code:
 ## What’s Kirby?
 - **[getkirby.com](https://getkirby.com)** – Get to know the CMS.
 - **[Try it](https://getkirby.com/try)** – Take a test ride with our online demo. Or download one of our kits to get started.
-- **[Documentation](https://getkirby.com/docs/guide)** – Read the official guide, reference and cookbook recipes.
+- **[Documentation](https://getkirby.com/docs/guide)** – Read the official guide, reference, and cookbook recipes.
 - **[Issues](https://github.com/getkirby/kirby/issues)** – Report bugs and other problems.
 - **[Feedback](https://feedback.getkirby.com)** – You have an idea for Kirby? Share it.
 - **[Forum](https://forum.getkirby.com)** – Whenever you get stuck, don't hesitate to reach out for questions and support.
