@@ -220,6 +220,11 @@ To load the static cache files from PHP, please place the following code snippet
 (function /* staticache */ () {
   $root = __DIR__ . '/site/cache';
 
+  // only use cached files for static responses, pass dynamic requests through
+  if (in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD']) === false) {
+    return;
+  }
+
   // check if a cache for this domain exists
   $root .= '/' . $_SERVER['SERVER_NAME'] . '/pages';
   if (is_dir($root) !== true) {
