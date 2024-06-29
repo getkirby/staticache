@@ -46,7 +46,7 @@ git submodule add https://github.com/getkirby/staticache.git site/plugins/static
 
 **Basic setup:**
 
-Staticache is a cache driver that can be activated for the page's cache:
+Staticache is a cache driver that can be activated for the pages cache:
 
 ```php
 // /site/config/config.php
