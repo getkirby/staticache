@@ -148,9 +148,18 @@ class StatiCache extends FileCache
 
 		$parts       = explode('.', $key);
 		$contentType = array_pop($parts);
-		$language    = $kirby->multilang() === true ? array_pop($parts) : null;
-		$id          = implode('.', $parts);
 
-		return compact('id', 'language', 'contentType');
+		// Check for the new Version API in Kirby 5
+		// Split a cache ID into `$id.$language.$version.$contentType`
+		if (class_exists('Kirby\Content\Version') === true) {
+			$version = array_pop($parts);
+		} else {
+			$version = null;
+		}
+
+		$language = $kirby->multilang() === true ? array_pop($parts) : null;
+		$id       = implode('.', $parts);
+
+		return compact('id', 'language', 'contentType', 'version');
 	}
 }
