@@ -59,7 +59,20 @@ class StatiCache extends FileCache
 			$result  = $headers . "\n\n" . $result;
 		}
 
-		return F::write($this->file($cacheId), $result);
+		$cacheFile = $this->file($cacheId);
+		$success = F::write($cacheFile, $result);
+		
+		// Setze das last modified Datum der Page als Datei-Timestamp
+		if ($success === true) {
+			$kirby = App::instance();
+			$page = $kirby->page($cacheId['id']);
+			
+			if ($page && $page->modified()) {
+				@touch($cacheFile, $page->modified());
+			}
+		}
+		
+		return $success;
 	}
 
 	/**
