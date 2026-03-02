@@ -314,7 +314,94 @@ Replace the last six lines of the loader function with this code:
   die($body);
 ```
 
-## What’s Kirby?
+### Compression
+
+Staticache can write pre-compressed copies of cached files alongside the originals. This lets your web server serve them directly without runtime compression overhead.
+
+Enable compression with the `compression` option:
+
+```php
+// /site/config/config.php
+
+return [
+  'cache' => [
+    'pages' => [
+      'active'      => true,
+      'type'        => 'static',
+
+      // gzip with default compression level (6)
+      'compression' => ['gzip'],
+
+      // OR with explicit compression level (0-9)
+      'compression' => ['gzip' => 9]
+    ]
+  ]
+];
+```
+
+For each cached file (e.g. `index.html`), a compressed copy (e.g. `index.html.gz`) will be written next to it. The compressed files are automatically cleaned up when the cache is purged.
+
+You will need to configure your web server to prefer the pre-compressed files:
+
+**Apache:**
+
+Replace the Staticache rewrite rules in your `.htaccess` (see above) with gzip-aware variants[^1]:
+
+```
+# Serve pre-compressed static cache files
+RewriteCond %{HTTP:Accept-Encoding} gzip
+RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html.gz -f
+RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html.gz [END]
+
+# Fall back to uncompressed static cache
+RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html -f
+RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI}/index.html [END]
+
+RewriteCond %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} -f
+RewriteRule ^(.*) %{DOCUMENT_ROOT}/site/cache/%{SERVER_NAME}/pages/%{REQUEST_URI} [END]
+
+# Serve correct content type/encoding and prevent double compression
+RewriteRule \.html\.gz$ - [T=text/html,E=no-gzip:1]
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.gz$">
+    Header append Content-Encoding gzip
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+</IfModule>
+```
+
+**Caddy:**
+
+Add `precompressed` to your `file_server` directive[^2]. Without arguments, it checks for brotli, zstd, and gzip sidecar files (in that order):
+
+```
+example.com
+
+root * /path/to/your/site
+
+file_server {
+  precompressed
+}
+php_fastcgi unix//var/run/php-fpm.sock {
+  try_files {path} site/cache/{host}/pages/{path}/index.html site/cache/{host}/pages/{path} index.php
+}
+```
+
+Caddy will automatically serve pre-compressed files with the correct `Content-Encoding` header.
+
+**nginx:**
+
+```
+location / {
+  gzip_static on;
+  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
+}
+```
+
+nginx's `gzip_static` module will automatically prefer `.gz` files when available and the client supports gzip[^3].
+
+## What's Kirby?
 - **[getkirby.com](https://getkirby.com)** – Get to know the CMS.
 - **[Try it](https://getkirby.com/try)** – Take a test ride with our online demo. Or download one of our kits to get started.
 - **[Documentation](https://getkirby.com/docs/guide)** – Read the official guide, reference, and cookbook recipes.
@@ -330,3 +417,7 @@ Replace the last six lines of the loader function with this code:
 ## License
 
 [MIT](./LICENSE) License © 2022 [Bastian Allgeier](https://getkirby.com)
+
+[^1]: https://httpd.apache.org/docs/2.4/mod/mod_deflate.html#precompressed
+[^2]: https://caddyserver.com/docs/caddyfile/directives/file_server
+[^3]: https://nginx.org/en/docs/http/ngx_http_gzip_static_module.html
