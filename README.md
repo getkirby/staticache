@@ -284,12 +284,20 @@ You need to adapt your web server configuration accordingly:
 
 Header support in Apache requires [`mod_asis`](https://httpd.apache.org/docs/current/mod/mod_asis.html). Please ensure that your Apache installation has this module installed and enabled.
 
-Afterwards, add the following block to your `.htaccess` file to make Apache use `mod_asis` for cached files:
+Afterwards, add the following block to your Apache server configuration to make Apache use `mod_asis` for cached files:
 
 ```
 <Directory "/var/www/your-site/site/cache">
   SetHandler send-as-is
 </Directory>
+```
+
+`<Directory>` is not allowed in `.htaccess` files. In your `.htaccess` file, use this block instead:
+
+```
+<If "%{REQUEST_URI} =~ m#^/site/cache/#">
+  SetHandler send-as-is
+</If>
 ```
 
 **PHP loader:**
@@ -400,6 +408,12 @@ location / {
 ```
 
 nginx's `gzip_static` module will automatically prefer `.gz` files when available and the client supports gzip[^3].
+
+**Compression with header support:**
+
+If you also enable the `headers` option, each compressed copy starts with the uncompressed headers, followed by the compressed body. Staticache adds the `Content-Encoding` header to the compressed copies and `Accept-Encoding` to the `Vary` header of all copies.
+
+On Apache, set up `mod_asis` as shown in the header support section and use the gzip-aware rewrite rules from above. Leave out the `T=text/html` rule and the `mod_headers` block, because the cached files already contain these headers. Otherwise, Apache sends the `Content-Encoding` header twice.
 
 ## What's Kirby?
 - **[getkirby.com](https://getkirby.com)** – Get to know the CMS.
