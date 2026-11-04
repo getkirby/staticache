@@ -52,14 +52,16 @@ class StatiCache extends FileCache
 		$cacheId = static::parseCacheId($key);
 
 		// body
-		$result = $this->appendComment($value['html'], $cacheId['contentType']);
+		$body    = $this->appendComment($value['html'], $cacheId['contentType']);
+		$result  = $body;
+		$headers = null;
 
 		// headers (if enabled)
 		if (
 			isset($this->options['headers']) === true &&
 			$this->options['headers'] === true
 		) {
-			$headers = static::headersFromResponse($value['response'], $cacheId['contentType']);
+			$headers = static::headersFromResponse($value['response'], $cacheId['contentType'], $this->compressionConfig() !== []);
 			$result  = $headers . "\n\n" . $result;
 		}
 
@@ -67,7 +69,7 @@ class StatiCache extends FileCache
 		$success = F::write($file, $result);
 
 		if ($success === true) {
-			$this->writeCompressed($file, $result);
+			$this->writeCompressed($file, $body, $headers);
 		}
 
 		return $success;
@@ -153,16 +155,30 @@ class StatiCache extends FileCache
 
 	/**
 	 * Serializes all headers from a response array to a string of HTTP headers
+	 *
+	 * Merges `Accept-Encoding` into `Vary` if requested.
 	 */
-	protected static function headersFromResponse(array $response, string $extension): string
-	{
+	protected static function headersFromResponse(
+		array $response,
+		string $extension,
+		bool $vary = false
+	): string {
 		$headers = [
 			'Status: ' . ($response['code'] ?? 200),
 			'Content-Type: ' . ($response['type'] ?? Mime::fromExtension($extension))
 		];
 
 		foreach ($response['headers'] as $key => $value) {
+			if ($vary === true && strtolower($key) === 'vary') {
+				$value .= ', Accept-Encoding';
+				$vary   = false;
+			}
+
 			$headers[] = $key . ': ' . $value;
+		}
+
+		if ($vary === true) {
+			$headers[] = 'Vary: Accept-Encoding';
 		}
 
 		return implode("\n", $headers);
@@ -195,15 +211,24 @@ class StatiCache extends FileCache
 	/**
 	 * Writes compressed copies of a cached file for each
 	 * configured compression encoding
+	 *
+	 * If headers are stored, only the body is compressed so that
+	 * the web server can still read the headers from the file.
 	 */
-	protected function writeCompressed(string $file, string $content): void
+	protected function writeCompressed(string $file, string $body, string|null $headers): void
 	{
 		foreach ($this->compressionConfig() as ['encoder' => $encoder, 'level' => $level]) {
-			$compressed = $encoder->encode($content, $level);
+			$compressed = $encoder->encode($body, $level);
 
-			if ($compressed !== false) {
-				F::write($file . '.' . $encoder->extension(), $compressed);
+			if ($compressed === false) {
+				continue;
 			}
+
+			if ($headers !== null) {
+				$compressed = $headers . "\nContent-Encoding: " . $encoder->encoding() . "\n\n" . $compressed;
+			}
+
+			F::write($file . '.' . $encoder->extension(), $compressed);
 		}
 	}
 
