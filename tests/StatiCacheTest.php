@@ -228,6 +228,46 @@ class StatiCacheTest extends TestCase
 		$this->assertSame(['index.html'], Dir::files($root . '/notes'));
 	}
 
+	public function testSetCompressedWithHeaders(): void
+	{
+		$app  = $this->app(['compression' => ['gzip'], 'headers' => true]);
+		$file = $app->cache('pages')->root() . '/custom/index.html';
+
+		$app->render('custom');
+
+		[$headers, $body]         = explode("\n\n", F::read($file), 2);
+		[$gzipHeaders, $gzipBody] = explode("\n\n", F::read($file . '.gz'), 2);
+
+		$this->assertSame("Status: 202\nContent-Type: text/html\nX-Staticache: yes\nVary: Accept-Encoding", $headers);
+
+		// the headers stay readable, only the body is compressed
+		$this->assertSame($headers . "\nContent-Encoding: gzip", $gzipHeaders);
+		$this->assertSame($body, gzdecode($gzipBody));
+	}
+
+	public static function varyProvider(): array
+	{
+		return [
+			'other field'    => ['Accept', 'Accept, Accept-Encoding'],
+			'already listed' => ['Accept, accept-encoding', 'Accept, accept-encoding'],
+			'wildcard'       => ['*', '*']
+		];
+	}
+
+	#[DataProvider('varyProvider')]
+	public function testSetCompressedWithHeadersVary(string $vary, string $expected): void
+	{
+		F::write($this->tmp . '/site/templates/custom.php', '<?php $kirby->response()->header(\'Vary\', \'' . $vary . '\') ?>Custom');
+
+		$app  = $this->app(['compression' => ['gzip'], 'headers' => true]);
+		$file = $app->cache('pages')->root() . '/custom/index.html';
+
+		$app->render('custom');
+
+		$this->assertStringStartsWith("Status: 200\nContent-Type: text/html\nVary: " . $expected . "\n\n", F::read($file));
+		$this->assertStringStartsWith("Status: 200\nContent-Type: text/html\nVary: " . $expected . "\nContent-Encoding: gzip\n\n", F::read($file . '.gz'));
+	}
+
 	public static function htmlProvider(): array
 	{
 		return [

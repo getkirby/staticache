@@ -149,7 +149,8 @@ class StatiCache extends FileCache
 	/**
 	 * Serializes all headers from a response array to a string of HTTP headers
 	 *
-	 * Merges `Accept-Encoding` into `Vary` if requested.
+	 * Merges `Accept-Encoding` into `Vary` if requested,
+	 * unless `Vary` already lists it or is `*`.
 	 */
 	protected static function headersFromResponse(
 		array $response,
@@ -163,8 +164,13 @@ class StatiCache extends FileCache
 
 		foreach ($response['headers'] as $key => $value) {
 			if ($vary === true && strtolower($key) === 'vary') {
-				$value .= ', Accept-Encoding';
-				$vary   = false;
+				$fields = array_map('trim', explode(',', strtolower($value)));
+
+				if (array_intersect($fields, ['*', 'accept-encoding']) === []) {
+					$value .= ', Accept-Encoding';
+				}
+
+				$vary = false;
 			}
 
 			$headers[] = $key . ': ' . $value;
@@ -274,8 +280,11 @@ class StatiCache extends FileCache
 	 * If headers are stored, only the body is compressed so that
 	 * the web server can still read the headers from the file.
 	 */
-	protected function writeCompressed(string $file, string $body, string|null $headers): void
-	{
+	protected function writeCompressed(
+		string $file,
+		string $body,
+		string|null $headers = null
+	): void {
 		foreach ($this->compressionConfig() as ['encoder' => $encoder, 'level' => $level]) {
 			$compressed = $encoder->encode($body, $level);
 
