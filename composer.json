@@ -37,6 +37,14 @@
 		}
 	},
 	"scripts": {
+		"analyze": [
+			"@analyze:composer"
+		],
+		"analyze:composer": "composer validate --strict --no-check-version --no-check-all",
+		"ci": [
+			"@fix",
+			"@analyze"
+		],
 		"fix": "cpx getkirby/php-cs:0.3.0 fix"
 	}
 }
