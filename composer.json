@@ -4,7 +4,7 @@
 	"type": "kirby-plugin",
 	"license": "MIT",
 	"homepage": "https://getkirby.com/plugins/getkirby/staticache",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"authors": [
 		{
 			"name": "Bastian Allgeier",
@@ -18,16 +18,44 @@
 		}
 	],
 	"require": {
-		"getkirby/cms": "^3.8 || ^4.0 || ^5.0",
+		"php": "~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
 		"getkirby/composer-installer": "^1.2"
+	},
+	"require-dev": {
+		"getkirby/cms": "^6.0"
+	},
+	"suggest": {
+		"ext-brotli": "Support for Brotli (br) compressed copies of cached files",
+		"ext-zstd": "Support for Zstandard (zstd) compressed copies of cached files"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
 	},
 	"extra": {
 		"installer-name": "staticache",
+		"kirby": {
+			"compatible": "^3.10 || ^4.0 || ^5.0 || ^6.0"
+		},
 		"kirby-cms-path": false
 	},
 	"config": {
 		"allow-plugins": {
 			"getkirby/composer-installer": true
 		}
+	},
+	"scripts": {
+		"analyze": [
+			"@analyze:composer"
+		],
+		"analyze:composer": "composer validate --strict --no-check-version --no-check-all",
+		"ci": [
+			"@fix",
+			"@analyze",
+			"@test"
+		],
+		"fix": "cpx getkirby/php-cs:0.3.0 fix",
+		"test": "cpx phpunit/phpunit:12.5.42"
 	}
 }

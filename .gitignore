@@ -10,7 +10,7 @@
 /.idea
 
 # tests
-.phpunit.result.cache
+/.phpunit.cache
 /tests/coverage
 
 # Composer files

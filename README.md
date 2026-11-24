@@ -22,6 +22,10 @@ If your site has any logic in controllers, page models, templates, snippets, or 
 
 If only specific pages are affected by this, you can add them to the cache ignore list (see below) and use Staticache for the rest of your site. Otherwise, using Kirby's default page cache will be the better option overall because Kirby will automatically detect which responses can be cached and which caches can be used for the current request.
 
+## Requirements
+
+Kirby 3.10, 4, 5 or 6 on PHP 8.3, 8.4, 8.5 or 8.6. For older PHP versions, use [Staticache 2.1.0](https://github.com/getkirby/staticache/releases/tag/2.1.0).
+
 ## Installation
 
 ### Download
@@ -202,11 +206,11 @@ location / {
 }
 ```
 
-Change it to add `/site/cache/$server_addr/pages/$uri/index.html` before the last `/index.php` fallback:
+Change it to add `/site/cache/$host/pages/$uri/index.html` before the last `/index.php` fallback:
 
 ```
 location / {
-  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$host/pages/$uri/index.html /site/cache/$host/pages/$uri /index.php?$query_string;
 }
 ```
 
@@ -284,12 +288,20 @@ You need to adapt your web server configuration accordingly:
 
 Header support in Apache requires [`mod_asis`](https://httpd.apache.org/docs/current/mod/mod_asis.html). Please ensure that your Apache installation has this module installed and enabled.
 
-Afterwards, add the following block to your `.htaccess` file to make Apache use `mod_asis` for cached files:
+Afterwards, add the following block to your Apache server configuration to make Apache use `mod_asis` for cached files:
 
 ```
 <Directory "/var/www/your-site/site/cache">
   SetHandler send-as-is
 </Directory>
+```
+
+`<Directory>` is not allowed in `.htaccess` files. In your `.htaccess` file, use this block instead:
+
+```
+<If "%{REQUEST_URI} =~ m#^/site/cache/#">
+  SetHandler send-as-is
+</If>
 ```
 
 **PHP loader:**
@@ -395,11 +407,17 @@ Caddy will automatically serve pre-compressed files with the correct `Content-En
 ```
 location / {
   gzip_static on;
-  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$host/pages/$uri/index.html /site/cache/$host/pages/$uri /index.php?$query_string;
 }
 ```
 
 nginx's `gzip_static` module will automatically prefer `.gz` files when available and the client supports gzip[^3].
+
+**Compression with header support:**
+
+If you also enable the `headers` option, each compressed copy starts with the uncompressed headers, followed by the compressed body. Staticache adds the `Content-Encoding` header to the compressed copies and `Accept-Encoding` to the `Vary` header of all copies.
+
+On Apache, set up `mod_asis` as shown in the header support section and use the gzip-aware rewrite rules from above. Leave out the `T=text/html` rule and the `mod_headers` block, because the cached files already contain these headers. Otherwise, Apache sends the `Content-Encoding` header twice.
 
 ## What's Kirby?
 - **[getkirby.com](https://getkirby.com)** – Get to know the CMS.
