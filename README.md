@@ -22,6 +22,10 @@ If your site has any logic in controllers, page models, templates, snippets, or 
 
 If only specific pages are affected by this, you can add them to the cache ignore list (see below) and use Staticache for the rest of your site. Otherwise, using Kirby's default page cache will be the better option overall because Kirby will automatically detect which responses can be cached and which caches can be used for the current request.
 
+## Requirements
+
+Kirby 3.10, 4, 5 or 6 on PHP 8.3, 8.4, 8.5 or 8.6. For older PHP versions, use [Staticache 2.1.0](https://github.com/getkirby/staticache/releases/tag/2.1.0).
+
 ## Installation
 
 ### Download
