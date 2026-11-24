@@ -3,14 +3,14 @@
 namespace Kirby\Cache;
 
 use Closure;
-use Kirby\Cms\App;
-use Kirby\Cms\Url;
-use Kirby\Filesystem\F;
-use Kirby\Filesystem\Mime;
 use Kirby\Cache\Compression\BrotliEncoder;
 use Kirby\Cache\Compression\CompressionEncoder;
 use Kirby\Cache\Compression\GzipEncoder;
 use Kirby\Cache\Compression\ZstdEncoder;
+use Kirby\Cms\App;
+use Kirby\Cms\Url;
+use Kirby\Filesystem\F;
+use Kirby\Filesystem\Mime;
 use Kirby\Toolkit\Str;
 
 /**
@@ -18,79 +18,11 @@ use Kirby\Toolkit\Str;
  * that caches full HTML files to be read directly
  * by the web server.
  *
- * @package   Kirby Staticache
- * @author    Bastian Allgeier <bastian@getkirby.com>,
- *            Lukas Bestle <lukas@getkirby.com>
- * @link      https://getkirby.com
  * @copyright Bastian Allgeier
  * @license   https://opensource.org/licenses/MIT
  */
 class StatiCache extends FileCache
 {
-	/**
-	 * Internal method to retrieve the raw cache value;
-	 * needs to return a Value object or null if not found
-	 */
-	public function retrieve(string $key): Value|null
-	{
-		$file  = $this->file($key);
-		$value = F::read($file);
-
-		if (is_string($value) === true) {
-			return new Value($value, 0, filemtime($file));
-		}
-
-		return null;
-	}
-
-	/**
-	 * Writes an item to the cache for a given number of minutes and
-	 * returns whether the operation was successful
-	 */
-	public function set(string $key, $value, int $minutes = 0): bool
-	{
-		$cacheId = static::parseCacheId($key);
-
-		// body
-		$result = $this->appendComment($value['html'], $cacheId['contentType']);
-
-		// headers (if enabled)
-		if (
-			isset($this->options['headers']) === true &&
-			$this->options['headers'] === true
-		) {
-			$headers = static::headersFromResponse($value['response'], $cacheId['contentType']);
-			$result  = $headers . "\n\n" . $result;
-		}
-
-		$file    = $this->file($cacheId);
-		$success = F::write($file, $result);
-
-		if ($success === true) {
-			$this->writeCompressed($file, $result);
-		}
-
-		return $success;
-	}
-
-	/**
-	 * Removes an item from the cache and
-	 * returns whether the operation was successful
-	 *
-	 * Overrides the parent to also remove compressed
-	 * copies that the parent doesn't know about.
-	 */
-	public function remove(string $key): bool
-	{
-		$file = $this->file(static::parseCacheId($key));
-
-		foreach ($this->compressionConfig() as ['encoder' => $encoder]) {
-			F::remove($file . '.' . $encoder->extension());
-		}
-
-		return parent::remove($key);
-	}
-
 	/**
 	 * Appends a (HTML) comment to a cached body for
 	 * identification of cached responses
@@ -119,6 +51,69 @@ class StatiCache extends FileCache
 		}
 
 		return $body;
+	}
+
+	/**
+	 * Parses the `compression` option into a normalized array
+	 * of encoder/level pairs
+	 *
+	 * Supports both `['gzip']` (default level) and
+	 * `['gzip' => 9]` (explicit level) syntax.
+	 *
+	 * @return array<int, array{encoder: CompressionEncoder, level: int}>
+	 */
+	protected function compressionConfig(): array
+	{
+		$config = $this->options['compression'] ?? [];
+
+		if (is_array($config) === false) {
+			return [];
+		}
+
+		$encoders = static::encoders();
+		$result   = [];
+
+		foreach ($config as $key => $value) {
+			if (is_int($key) === true) {
+				$encoding = $value;
+				$encoder  = $encoders[$encoding] ?? null;
+				$level    = $encoder?->defaultLevel();
+			} else {
+				$encoding = $key;
+				$encoder  = $encoders[$encoding] ?? null;
+				$level    = $value;
+			}
+
+			if ($encoder !== null) {
+				$result[] = ['encoder' => $encoder, 'level' => $level];
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns the available compression encoders keyed by encoding name
+	 *
+	 * Only returns encoders whose PHP extensions are loaded.
+	 *
+	 * @return array<string, CompressionEncoder>
+	 */
+	protected static function encoders(): array
+	{
+		$encoders = [
+			'gzip' => new GzipEncoder(),
+		];
+
+		if (extension_loaded('brotli') === true) {
+			$encoders['br'] = new BrotliEncoder();
+		}
+
+		if (extension_loaded('zstd') === true) {
+			$encoders['zstd'] = new ZstdEncoder();
+		}
+
+		return $encoders;
 	}
 
 	/**
@@ -193,6 +188,70 @@ class StatiCache extends FileCache
 	}
 
 	/**
+	 * Removes an item from the cache and
+	 * returns whether the operation was successful
+	 *
+	 * Overrides the parent to also remove compressed
+	 * copies that the parent doesn't know about.
+	 */
+	public function remove(string $key): bool
+	{
+		$file = $this->file(static::parseCacheId($key));
+
+		foreach ($this->compressionConfig() as ['encoder' => $encoder]) {
+			F::remove($file . '.' . $encoder->extension());
+		}
+
+		return parent::remove($key);
+	}
+
+	/**
+	 * Internal method to retrieve the raw cache value;
+	 * needs to return a Value object or null if not found
+	 */
+	public function retrieve(string $key): Value|null
+	{
+		$file  = $this->file($key);
+		$value = F::read($file);
+
+		if (is_string($value) === true) {
+			return new Value($value, 0, filemtime($file));
+		}
+
+		return null;
+	}
+
+	/**
+	 * Writes an item to the cache for a given number of minutes and
+	 * returns whether the operation was successful
+	 */
+	public function set(string $key, $value, int $minutes = 0): bool
+	{
+		$cacheId = static::parseCacheId($key);
+
+		// body
+		$result = $this->appendComment($value['html'], $cacheId['contentType']);
+
+		// headers (if enabled)
+		if (
+			isset($this->options['headers']) === true &&
+			$this->options['headers'] === true
+		) {
+			$headers = static::headersFromResponse($value['response'], $cacheId['contentType']);
+			$result  = $headers . "\n\n" . $result;
+		}
+
+		$file    = $this->file($cacheId);
+		$success = F::write($file, $result);
+
+		if ($success === true) {
+			$this->writeCompressed($file, $result);
+		}
+
+		return $success;
+	}
+
+	/**
 	 * Writes compressed copies of a cached file for each
 	 * configured compression encoding
 	 */
@@ -205,68 +264,5 @@ class StatiCache extends FileCache
 				F::write($file . '.' . $encoder->extension(), $compressed);
 			}
 		}
-	}
-
-	/**
-	 * Returns the available compression encoders keyed by encoding name
-	 *
-	 * Only returns encoders whose PHP extensions are loaded.
-	 *
-	 * @return array<string, CompressionEncoder>
-	 */
-	protected static function encoders(): array
-	{
-		$encoders = [
-			'gzip' => new GzipEncoder(),
-		];
-
-		if (extension_loaded('brotli') === true) {
-			$encoders['br'] = new BrotliEncoder();
-		}
-
-		if (extension_loaded('zstd') === true) {
-			$encoders['zstd'] = new ZstdEncoder();
-		}
-
-		return $encoders;
-	}
-
-	/**
-	 * Parses the `compression` option into a normalized array
-	 * of encoder/level pairs
-	 *
-	 * Supports both `['gzip']` (default level) and
-	 * `['gzip' => 9]` (explicit level) syntax.
-	 *
-	 * @return array<int, array{encoder: CompressionEncoder, level: int}>
-	 */
-	protected function compressionConfig(): array
-	{
-		$config = $this->options['compression'] ?? [];
-
-		if (is_array($config) === false) {
-			return [];
-		}
-
-		$encoders = static::encoders();
-		$result   = [];
-
-		foreach ($config as $key => $value) {
-			if (is_int($key) === true) {
-				$encoding = $value;
-				$encoder  = $encoders[$encoding] ?? null;
-				$level    = $encoder?->defaultLevel();
-			} else {
-				$encoding = $key;
-				$encoder  = $encoders[$encoding] ?? null;
-				$level    = $value;
-			}
-
-			if ($encoder !== null) {
-				$result[] = ['encoder' => $encoder, 'level' => $level];
-			}
-		}
-
-		return $result;
 	}
 }

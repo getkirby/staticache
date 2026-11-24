@@ -35,5 +35,8 @@
 		"allow-plugins": {
 			"getkirby/composer-installer": true
 		}
+	},
+	"scripts": {
+		"fix": "cpx getkirby/php-cs:0.3.0 fix"
 	}
 }
