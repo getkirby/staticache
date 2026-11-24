@@ -43,8 +43,10 @@
 		"analyze:composer": "composer validate --strict --no-check-version --no-check-all",
 		"ci": [
 			"@fix",
-			"@analyze"
+			"@analyze",
+			"@test"
 		],
-		"fix": "cpx getkirby/php-cs:0.3.0 fix"
+		"fix": "cpx getkirby/php-cs:0.3.0 fix",
+		"test": "cpx phpunit/phpunit:12.5.42"
 	}
 }

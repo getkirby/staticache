@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+	bootstrap="tests/bootstrap.php"
+	cacheDirectory=".phpunit.cache"
+	colors="true"
+	displayDetailsOnPhpunitDeprecations="true"
+	displayDetailsOnTestsThatTriggerDeprecations="true"
+	displayDetailsOnTestsThatTriggerNotices="true"
+	displayDetailsOnTestsThatTriggerWarnings="true"
+	failOnDeprecation="true"
+	failOnNotice="true"
+	failOnPhpunitDeprecation="true"
+	failOnRisky="true"
+	failOnWarning="true"
+>
+	<source>
+		<include>
+			<directory>./src</directory>
+			<file>./index.php</file>
+		</include>
+	</source>
+
+	<testsuites>
+		<testsuite name="staticache">
+			<directory>./tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
