@@ -206,11 +206,11 @@ location / {
 }
 ```
 
-Change it to add `/site/cache/$server_addr/pages/$uri/index.html` before the last `/index.php` fallback:
+Change it to add `/site/cache/$host/pages/$uri/index.html` before the last `/index.php` fallback:
 
 ```
 location / {
-  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$host/pages/$uri/index.html /site/cache/$host/pages/$uri /index.php?$query_string;
 }
 ```
 
@@ -407,7 +407,7 @@ Caddy will automatically serve pre-compressed files with the correct `Content-En
 ```
 location / {
   gzip_static on;
-  try_files $uri $uri/ /site/cache/$server_addr/pages/$uri/index.html /site/cache/$server_addr/pages/$uri /index.php?$query_string;
+  try_files $uri $uri/ /site/cache/$host/pages/$uri/index.html /site/cache/$host/pages/$uri /index.php?$query_string;
 }
 ```
 
