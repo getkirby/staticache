@@ -24,6 +24,15 @@
 	"require-dev": {
 		"getkirby/cms": "^6.0"
 	},
+	"suggest": {
+		"ext-brotli": "Support for Brotli (br) compressed copies of cached files",
+		"ext-zstd": "Support for Zstandard (zstd) compressed copies of cached files"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
 	"extra": {
 		"installer-name": "staticache",
 		"kirby": {
